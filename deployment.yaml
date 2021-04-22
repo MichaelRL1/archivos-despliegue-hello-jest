@@ -1,0 +1,55 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: hola-mundo
+  namespace: default
+spec:
+  selector:
+    app: hola-mundo
+  ports:
+    - port: 80
+      targetPort: 3000
+  type: LoadBalancer
+---
+apiVersion: "apps/v1"
+kind: "Deployment"
+metadata:
+  name: "hola-mundo"
+  namespace: "default"
+  labels:
+    app: "hola-mundo"
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: "hola-mundo"
+  template:
+    metadata:
+      labels:
+        app: "hola-mundo"
+    spec:
+      containers:
+      - name: "hola-mundo"
+        image: "gcr.io/serene-circlet-311420/node-hello"
+---
+apiVersion: "autoscaling/v2beta1"
+kind: "HorizontalPodAutoscaler"
+metadata:
+  name: "hola-mundo-hpa-2yun"
+  namespace: "default"
+  labels:
+    app: "hola-mundo"
+spec:
+  scaleTargetRef:
+    kind: "Deployment"
+    name: "hola-mundo"
+    apiVersion: "apps/v1"
+  minReplicas: 1
+  maxReplicas: 5
+  metrics:
+  - type: "Resource"
+    resource:
+      name: "cpu"
+      targetAverageUtilization: 80
+
+
